@@ -64,7 +64,7 @@ int log_printf(enum log_types type, const char *logmsg, ...)
 */
 
 	bzero(buf, BUFSIZE);
-	snprintf(buf, BUFSIZE, "%s %d %s", currentTS(), getpid(), logmsg);
+	snprintf(buf, BUFSIZE, "%.104s %d %.104s", currentTS(), getpid(), logmsg);
 	va_start(args, logmsg);
 
 	return vfprintf(log_file, buf, args);

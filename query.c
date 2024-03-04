@@ -187,7 +187,7 @@ int query_inode_full(MYSQL *mysql, const char *path, char *name, size_t name_len
     snprintf(sql, SQL_MAX, "SELECT t%d.inode, t%d.name, t%d.parent, "
 	     		   "       (SELECT COUNT(inode) FROM tree AS t%d WHERE t%d.inode=t%d.inode) "
 			   "               AS nlinks "
-	     		   "FROM %s WHERE %s",
+	     		   "FROM %.1024s WHERE %.1024s",
 	     depth, depth, depth,
 	     depth+1, depth+1, depth,
 	     sql_from, sql_where);
@@ -789,16 +789,14 @@ static int write_one_block(MYSQL *mysql, long inode,
 		 "WHERE inode=%ld AND seq=%lu",
 		 inode, seq);
     } else {
-        size_t pos, new_size;
+        size_t pos;
         pos = snprintf(sql, sizeof(sql),
 		 "UPDATE data_blocks SET data=CONCAT(");
 	if (offset > 0)
 	    pos += snprintf(sql + pos, sizeof(sql) - pos, "RPAD(IF(ISNULL(data),'', data), %" PRIuMAX ", '\\0'),", offset);
 	pos += snprintf(sql + pos, sizeof(sql) - pos, "?,");
-	new_size = offset + size;
 	if (offset + size < current_block_size) {
 	    pos += snprintf(sql + pos, sizeof(sql) - pos, "SUBSTRING(data FROM %" PRIuMAX "),", offset + size + 1);
-	    new_size = current_block_size;
 	}
 	sql[--pos] = '\0';	/* Remove the trailing comma. */
 	pos += snprintf(sql + pos, sizeof(sql) - pos, ") WHERE inode=%ld AND seq=%lu",
@@ -1218,7 +1216,6 @@ int query_fsck(MYSQL *mysql)
     // 1. delete inodes with deleted==1
     int ret;
 //    int ret2;
-    int result;
     char sql[SQL_MAX];
     printf("Stage 1...\n");
     snprintf(sql, SQL_MAX,
@@ -1296,7 +1293,7 @@ int query_fsck(MYSQL *mysql)
 
       snprintf(sql, SQL_MAX, "update inodes set size=%ld where inode=%ld;", size, inode);
       log_printf(LOG_D_SQL, "sql=%s\n", sql);
-      result = mysql_query(mysql, sql);
+      mysql_query(mysql, sql);
 
 /*      if (myresult) { // something has gone wrong.. delete datablocks...
 

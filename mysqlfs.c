@@ -139,7 +139,6 @@ static int mysqlfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 {
     (void) offset;
     (void) fi;
-    int ret;
     MYSQL *dbconn;
     long inode;
 
@@ -183,7 +182,7 @@ static int mysqlfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 #endif
 
 
-    ret = query_readdir(dbconn, inode, buf, filler);
+    query_readdir(dbconn, inode, buf, filler);
     pool_put(dbconn);
 
     return 0;

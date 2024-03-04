@@ -51,7 +51,7 @@ unsigned int lifo_pool_cnt = 0;
 static MYSQL *pool_open_mysql_connection()
 {
     MYSQL *mysql;
-    my_bool reconnect = 1;
+    my_ulonglong reconnect = 1;
 
     mysql = mysql_init(NULL);
     if (!mysql) {
